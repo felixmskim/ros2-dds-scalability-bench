@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://github.com/eclipse-cyclonedds/cyclonedds"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="https://github.com/eclipse-cyclonedds/cyclonedds https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
+    <Domain Id="any">
+        <Internal>
+            <SocketReceiveBufferSize min="2097152"/>
+        </Internal>
+        <General>
+            <Interfaces>
+                <NetworkInterface name="lo"/>
+            </Interfaces>
+        </General>
+        <Discovery>
+            <MaxAutoParticipantIndex>100</MaxAutoParticipantIndex>
+        </Discovery>
+    </Domain>
+</CycloneDDS>
