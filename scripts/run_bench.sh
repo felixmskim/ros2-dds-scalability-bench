@@ -8,7 +8,8 @@ if [ "$#" -lt 2 ]; then
 fi
 
 DDS_TYPE=$1
-shift # 첫 번째 인자(DDS_TYPE)를 제거하고 나머지를 ROS2 명령어로 취급
+CONFIG_PATH=$2  # 두 번째 인자로 XML 경로를 받음
+shift 2        # 앞의 두 인자를 제거
 COMMAND=$@
 
 # 설정 파일 경로 (컨테이너 내부 기준)
@@ -18,13 +19,13 @@ CYCLONE_CONFIG="/root/configs/cyclonedds.xml"
 case $DDS_TYPE in
     "fastdds")
         export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-        export FASTRTPS_DEFAULT_PROFILES_FILE=$FAST_CONFIG
-        echo "[INFO] Running with FastDDS using $FAST_CONFIG"
+        export FASTRTPS_DEFAULT_PROFILES_FILE=$CONFIG_PATH # 가변 경로 적용
+        echo "[INFO] Running with FastDDS using $CONFIG_PATH"
         ;;
     "cyclonedds")
         export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-        export CYCLONEDDS_URI="file://$CYCLONE_CONFIG"
-        echo "[INFO] Running with CycloneDDS using $CYCLONE_CONFIG"
+        export CYCLONEDDS_URI="file://$CONFIG_PATH"
+        echo "[INFO] Running with CycloneDDS using $CONFIG_PATH"
         ;;
     *)
         echo "[ERROR] Unknown DDS type: $DDS_TYPE"
