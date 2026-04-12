@@ -3,26 +3,30 @@ import subprocess
 import time
 import os
 
-# 실험 설정 
-DDS_TYPE = "cyclonedds"  # 사용할 DDS 구현체 ("fastdds", "cyclonedds")
+# Phase 1: Transport Layer 실험 설정
+DDS_TYPE = "fastdds" # 사용할 DDS 구현체 ("fastdds", "cyclonedds")
+# [추가] 실험할 버퍼 설정 파일들
+BUFFER_CONFIGS = {
+    "64k": "/root/configs/fast_64k.xml",
+    "2m": "/root/configs/fast_2m.xml",
+    "8m": "/root/configs/fast_8m.xml"
+}
 PAYLOAD_SIZES = [32768, 2097152]  # 32KB, 2MB
 NODE_COUNTS = [2, 10, 20, 50, 100]  # 총 노드 수 (1 Ping + N-1 Pong) / N=1 제외
 DURATION = 30  # 각 실험당 실행 시간 (초)
 
-def run_experiment(node_count, payload_size):
+def run_experiment(node_count, payload_size, buf_label, xml_path):
     processes = []
-    csv_name = f"/root/results/{DDS_TYPE}_p{payload_size}_n{node_count}.csv"
+    # 결과 파일명에 버퍼 정보 추가
+    csv_name = f"/root/results/{DDS_TYPE}_b{buf_label}_p{payload_size}_n{node_count}.csv"
     
-    print(f"\n[START] Nodes: {node_count}, Payload: {payload_size} bytes")
-
+    print(f"\n[START] Buffer: {buf_label}, Nodes: {node_count}, Payload: {payload_size}B")
     # 1. (N-1)개의 Pong 노드 실행 (배경 부하 및 에코 역할)
     for i in range(node_count - 1):
         cmd = [
-            "/root/scripts/run_bench.sh", DDS_TYPE,
+            "/root/scripts/run_bench.sh", DDS_TYPE, xml_path, # XML 경로 전달
             "ros2", "run", "dds_bench", "perf_node",
-            "--ros-args", 
-            "-p", "mode:=pong", 
-            "-r", f"__node:=pong_node_{i}"
+            "--ros-args", "-p", "mode:=pong", "-r", f"__node:=pong_node_{i}"
         ]
         processes.append(subprocess.Popen(cmd, stdout=subprocess.DEVNULL))
 
@@ -30,13 +34,10 @@ def run_experiment(node_count, payload_size):
 
     # 2. 1개의 Ping 노드 실행 (실제 RTT 측정 및 로깅)
     ping_cmd = [
-        "/root/scripts/run_bench.sh", DDS_TYPE,
+        "/root/scripts/run_bench.sh", DDS_TYPE, xml_path, # XML 경로 전달
         "ros2", "run", "dds_bench", "perf_node",
-        "--ros-args", 
-        "-p", "mode:=ping", 
-        "-p", f"payload_size:={payload_size}",
-        "-p", f"csv_path:={csv_name}",
-        "-r", f"__node:=ping_node_main"
+        "--ros-args", "-p", "mode:=ping", "-p", f"payload_size:={payload_size}", 
+        "-p", f"csv_path:={csv_name}", "-r", "__node:=ping_node_main"
     ]
     # ping_p = subprocess.Popen(ping_cmd, stdout=subprocess.PIPE, text=True)
     ping_p = subprocess.Popen(ping_cmd, stdout=subprocess.DEVNULL)
@@ -63,9 +64,12 @@ if __name__ == "__main__":
     if not os.path.exists("/root/results"):
         os.makedirs("/root/results")
     try:
-        for n in NODE_COUNTS:
-            for size in PAYLOAD_SIZES:
-                run_experiment(n, size)
+        # 버퍼 설정 -> 노드 수 -> 페이로드 순으로 실험 순회
+        for buf_label, xml_path in BUFFER_CONFIGS.items():
+            for n in NODE_COUNTS:
+                for size in PAYLOAD_SIZES:
+                    run_experiment(n, size, buf_label, xml_path)
+                    time.sleep(5) # 시스템 안정화
     except KeyboardInterrupt:
         subprocess.run(["pkill", "-f", "perf_node"])
         print("\nExperiment interrupted.")
