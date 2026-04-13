@@ -29,8 +29,15 @@ def run_experiment(node_count, payload_size, buf_label, xml_path):
             "--ros-args", "-p", "mode:=pong", "-r", f"__node:=pong_node_{i}"
         ]
         processes.append(subprocess.Popen(cmd, stdout=subprocess.DEVNULL))
+        # [수정] 노드가 너무 많을 때 한꺼번에 띄우면 커널 스케줄러가 마비됨
+        if node_count > 50:
+            time.sleep(0.1)
 
-    time.sleep(2)  # 노드 탐색(Discovery)을 위한 대기 시간
+    # 2. Discovery 대기 시간 대폭 상향
+    # [수정] 노드 수에 비례하여 대기 시간을 늘려야 합니다. (N=100일 때 2초는 턱없이 부족)
+    wait_time = 5 if node_count < 50 else 15 
+    print(f"Waiting {wait_time}s for Discovery...")
+    time.sleep(wait_time)
 
     # 2. 1개의 Ping 노드 실행 (실제 RTT 측정 및 로깅)
     ping_cmd = [
@@ -40,7 +47,7 @@ def run_experiment(node_count, payload_size, buf_label, xml_path):
         "-p", f"csv_path:={csv_name}", "-r", "__node:=ping_node_main"
     ]
     # ping_p = subprocess.Popen(ping_cmd, stdout=subprocess.PIPE, text=True)
-    ping_p = subprocess.Popen(ping_cmd, stdout=subprocess.DEVNULL)
+    ping_p = subprocess.Popen(ping_cmd) # 에러 확인을 위해 stdout 열어둠
     processes.append(ping_p)
 
     time.sleep(DURATION)

@@ -4,15 +4,23 @@
             xsi:schemaLocation="https://github.com/eclipse-cyclonedds/cyclonedds https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
     <Domain Id="any">
         <Internal>
-            <SocketReceiveBufferSize min="2097152"/>
+            <SocketReceiveBufferSize min="8MB"/>
+            <SocketSendBufferSize min="8MB"/>
+            <Watermarks>
+                <WhcHigh>2MB</WhcHigh>
+            </Watermarks>
         </Internal>
+
         <General>
             <Interfaces>
                 <NetworkInterface name="lo"/>
             </Interfaces>
+            <MaxAutoParticipantIndex>200</MaxAutoParticipantIndex>
         </General>
-        <Discovery>
-            <MaxAutoParticipantIndex>100</MaxAutoParticipantIndex>
-        </Discovery>
+
+        <Tracing>
+            <Verbosity>error</Verbosity>
+            <OutputFile>stdout</OutputFile>
+        </Tracing>
     </Domain>
 </CycloneDDS>

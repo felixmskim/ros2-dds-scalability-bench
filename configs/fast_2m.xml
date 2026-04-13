@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dds xmlns="http://www.eprosima.com/XMLSchemas/fastrtps_profiles">
+    <profiles>
+        <transport_descriptors>
+            <transport_descriptor>
+                <transport_id>huge_data_transport</transport_id>
+                <type>UDPv4</type>
+                <sendBufferSize>2097152</sendBufferSize>
+                <receiveBufferSize>2097152</receiveBufferSize>
+                <maxMessageSize>2200000</maxMessageSize>
+            </transport_descriptor>
+        </transport_descriptors>
+
+        <participant profile_name="tuned_participant">
+            <rtps>
+                <userTransports>
+                    <transport_id>huge_data_transport</transport_id>
+                </userTransports>
+                <useBuiltinTransports>false</useBuiltinTransports>
+                <builtin>
+                    <metatrafficUnicastLocatorList>
+                        <locator/>
+                    </metatrafficUnicastLocatorList>
+                </builtin>
+            </rtps>
+        </participant>
+
+        <data_writer profile_name="tuned_writer">
+            <historyMemoryPolicy>PREALLOCATED_WITH_REALLOC</historyMemoryPolicy>
+            
+            <topic>
+                <historyQos>
+                    <kind>KEEP_LAST</kind>
+                    <depth>10</depth>
+                </historyQos>
+            </topic>
+
+            <qos>
+                <reliability>
+                    <kind>RELIABLE</kind>
+                </reliability>
+            </qos>
+        </data_writer>
+    </profiles>
+</dds>
