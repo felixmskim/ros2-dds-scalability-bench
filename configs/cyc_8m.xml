@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://github.com/eclipse-cyclonedds/cyclonedds" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://github.com/eclipse-cyclonedds/cyclonedds https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
+    <Domain Id="any">
+        <Internal>
+            <SocketReceiveBufferSize min="8388608B"/>
+            <SocketSendBufferSize min="8388608B"/>
+            <Watermarks><WhcHigh>5MB</WhcHigh></Watermarks>
+        </Internal>
+        <General>
+            <Interfaces><NetworkInterface name="lo"/></Interfaces>
+        </General>
+    </Domain>
+</CycloneDDS>

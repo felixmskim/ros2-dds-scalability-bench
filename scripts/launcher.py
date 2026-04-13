@@ -4,13 +4,24 @@ import time
 import os
 
 # Phase 1: Transport Layer 실험 설정
-DDS_TYPE = "fastdds" # 사용할 DDS 구현체 ("fastdds", "cyclonedds")
+DDS_TYPE = "cyclonedds" # 사용할 DDS 구현체 ("fastdds", "cyclonedds")
+
 # [추가] 실험할 버퍼 설정 파일들
+# fast_dds
+# BUFFER_CONFIGS = {
+#     "64k": "/root/configs/fast_64k.xml",
+#     "2m": "/root/configs/fast_2m.xml",
+#     "8m": "/root/configs/fast_8m.xml"
+# }
+
+# cyclone_dds
 BUFFER_CONFIGS = {
-    "64k": "/root/configs/fast_64k.xml",
-    "2m": "/root/configs/fast_2m.xml",
-    "8m": "/root/configs/fast_8m.xml"
+    "64k": "/root/configs/cyc_64k.xml",
+    "2m": "/root/configs/cyc_2m.xml",
+    "8m": "/root/configs/cyc_8m.xml"
 }
+
+
 PAYLOAD_SIZES = [32768, 2097152]  # 32KB, 2MB
 NODE_COUNTS = [2, 10, 20, 50, 100]  # 총 노드 수 (1 Ping + N-1 Pong) / N=1 제외
 DURATION = 30  # 각 실험당 실행 시간 (초)
